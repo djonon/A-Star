@@ -24,23 +24,23 @@ public class UserMap
 {
 	private int rows;
 	private int columns;
-	private Square[][] elements;
-	private Square target;
+	private Tile[][] elements;
+	private Tile target;
 	private String map[][];
 		
 	private static final String SPACE = "  ";
 	private static final String PATH = "# ";
 	private static final String TARGET = "X ";
 	
-	private List<Square> opened = new ArrayList<Square>();
-	private List<Square> closed = new ArrayList<Square>();
-	private List<Square> bestList = new ArrayList<Square>();
+	private List<Tile> opened = new ArrayList<Tile>();
+	private List<Tile> closed = new ArrayList<Tile>();
+	private List<Tile> bestList = new ArrayList<Tile>();
 	
 	public UserMap(int rows, int columns)
 	{
 		this.rows = rows;
 		this.columns = columns;
-		elements = new Square[rows][columns];
+		elements = new Tile[rows][columns];
 		
 		try
 		{
@@ -65,14 +65,14 @@ public class UserMap
 		init();
 	}
 /*
- *This create a Square object representing 
+ *This create a Tile object representing 
  *an x and y coordinates for each position
  *in the map
  *
  */
 	private void init()
 	{
-		createSquares();
+		createTiles();
 		setStartAndTarget();
 		generateAdjacenies();//build map adjacency information
 	}
@@ -105,26 +105,26 @@ public class UserMap
 		}
 	}
 
-	private void createSquares()
+	private void createTiles()
 	{
 
 		for (int i = 0; i < rows; i++)
 		{
 			for (int j = 0; j < columns; j++)
 			{
-				elements[i][j] = new Square(i, j, this);				
+				elements[i][j] = new Tile(i, j, this);				
 			}
 		}
 	}
 
-	public Square getSquare(int x, int y)
+	public Tile getTile(int x, int y)
 	{
 		return elements[x][y];
 	}
 
-	public void setSquare(Square square)
+	public void setTile(Tile tile)
 	{
-		elements[square.getX()][square.getY()] = square;
+		elements[tile.getX()][tile.getY()] = tile;
 	}
 
 	public void draw()
@@ -139,35 +139,35 @@ public class UserMap
 		{
 			for (int j = 0; j < columns; j++)
 			{
-				Square square = elements[i][j];
+				Tile tile = elements[i][j];
 			}
 			System.out.println("");
 
 			for (int j = 0; j < columns; j++)
 			{
-				Square square = elements[i][j];
-				drawMap(square);
+				Tile tile = elements[i][j];
+				drawMap(tile);
 			}
 			System.out.println("");
 		}
 	}
 		
-	private void drawMap(Square square)
+	private void drawMap(Tile tile)
 	{
-		int x = square.getX();
-		int y = square.getY();
+		int x = tile.getX();
+		int y = tile.getY();
     	System.out.print(map[x][y] + " ");  
  		
-		for (Square neighbor : square.getAdjacencies())
+		for (Tile neighbor : tile.getAdjacencies())
 		{
 			if (neighbor.getX() == x && neighbor.getY() == y - 1)
 			{
-				if (square.isEnd())
+				if (tile.isEnd())
 				{
 					System.out.print(TARGET);
 					return;
 				}
-				if (bestList.contains(square))
+				if (bestList.contains(tile))
 				{
 					System.out.print(PATH);
 					return;
@@ -177,13 +177,13 @@ public class UserMap
 			}
 		}
 
-		if (square.isEnd())
+		if (tile.isEnd())
 		{
 			System.out.print(TARGET);
 			return;
 		}
 
-		if (bestList.contains(square))
+		if (bestList.contains(tile))
 		{
 			System.out.print(PATH);
 			return;
@@ -196,9 +196,9 @@ public class UserMap
 		{
 		System.out.println("Calculating best path...");
 		
-		Set<Square> adjacencies = elements[0][0].getAdjacencies();
+		Set<Tile> adjacencies = elements[0][0].getAdjacencies();
 		
-		for (Square adjacency : adjacencies)
+		for (Tile adjacency : adjacencies)
 		{
 			adjacency.setParent(elements[0][0]);
 			if (adjacency.isStart() == false)
@@ -209,7 +209,7 @@ public class UserMap
 		
 		while (opened.size() > 0)
 		{
-			Square best = findBestPassThrough();
+			Tile best = findBestPassThrough();
 			opened.remove(best);
 			closed.add(best);
 			if (best.isEnd())
@@ -222,14 +222,14 @@ public class UserMap
 			
 			else
 			{
-				Set<Square> neighbors = best.getAdjacencies();
-				for (Square neighbor : neighbors)
+				Set<Tile> neighbors = best.getAdjacencies();
+				for (Tile neighbor : neighbors)
 				{
 					if (opened.contains(neighbor))
 					{
-						Square tmpSquare = new Square(neighbor.getX(),neighbor.getY(), this);
-						tmpSquare.setParent(best);
-						if (tmpSquare.getPassThrough(target) >= neighbor.getPassThrough(target))
+						Tile tmpTile = new Tile(neighbor.getX(),neighbor.getY(), this);
+						tmpTile.setParent(best);
+						if (tmpTile.getPassThrough(target) >= neighbor.getPassThrough(target))
 						{
 							continue;
 						}
@@ -237,9 +237,9 @@ public class UserMap
 
 					if (closed.contains(neighbor))
 					{
-						Square tmpSquare = new Square(neighbor.getX(),neighbor.getY(), this);
-						tmpSquare.setParent(best);
-						if (tmpSquare.getPassThrough(target) >= neighbor.getPassThrough(target))
+						Tile tmpTile = new Tile(neighbor.getX(),neighbor.getY(), this);
+						tmpTile.setParent(best);
+						if (tmpTile.getPassThrough(target) >= neighbor.getPassThrough(target))
 						{
 							continue;
 						}
@@ -255,25 +255,25 @@ public class UserMap
 		System.out.println("No Path to target... PLEASE RUN AGAIN!");
 	}
 
-	private void populateBestList(Square square)
+	private void populateBestList(Tile tile)
 	{
-		bestList.add(square);
-		if (square.getParent().isStart() == false)
+		bestList.add(tile);
+		if (tile.getParent().isStart() == false)
 		{
-			populateBestList(square.getParent());
+			populateBestList(tile.getParent());
 		}
 
 		return;
 	}
 
-	private Square findBestPassThrough()
+	private Tile findBestPassThrough()
 	{
-		Square best = null;
-		for (Square square : opened)
+		Tile best = null;
+		for (Tile tile : opened)
 		{
-			if (best == null || square.getPassThrough(target) < best.getPassThrough(target))
+			if (best == null || tile.getPassThrough(target) < best.getPassThrough(target))
 			{
-				best = square;
+				best = tile;
 			}
 		}
 
